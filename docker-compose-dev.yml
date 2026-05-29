@@ -4,6 +4,9 @@ include:
 
 
 services:
+  # ================================================= #
+  # ==================== Gateway ==================== #
+  # ================================================= #
   gateway:
     build:
       context: ./Services/Gateway
@@ -18,10 +21,15 @@ services:
       - /app/obj
     ports:
       - "${GATEWAY_PORT}:8080"
+    networks:
+      - raion-net
     command: dotnet watch run --no-launch-profile --non-interactive
 
 
 
+  # ==================================================== #
+  # ==================== Controller ==================== #
+  # ==================================================== #
   controller:
     build:
       context: ./Services/Controller
@@ -36,10 +44,16 @@ services:
       - /app/obj
     ports:
       - "${CONTROLLER_PORT}:8080"
+    networks:
+      - raion-net
     command: dotnet watch run --no-launch-profile --non-interactive
 
 
 
+
+  # ================================================= #
+  # ==================== Compute ==================== #
+  # ================================================= #
   compute-1:
     extends:
       file: ./Services/Compute/docker-compose-dev.yml
@@ -47,11 +61,76 @@ services:
     container_name: compute-api-dev-1
     ports:
       - "${COMPUTE_PORT_1}:8080"
+    environment:
+      - ConnectionStrings__Redis=redis-1:6379
+    networks:
+      - raion-compute-net-1
+    depends_on:
+      - redis-1
+
+  redis-1:
+    extends:
+      file: ./Services/Compute/docker-compose-dev.yml
+      service: compute-redis-template
+    container_name: redis-cache-dev-1
+    networks:
+      - raion-compute-net-1
+    volumes:
+      - redis-1-data:/data
+
+
 
   compute-2:
-    extends: 
+    extends:
       file: ./Services/Compute/docker-compose-dev.yml
       service: compute-template
     container_name: compute-api-dev-2
     ports:
       - "${COMPUTE_PORT_2}:8080"
+    networks:
+      - raion-compute-net-2
+    depends_on:
+      - redis-2
+    environment:
+      - ConnectionStrings__Redis=redis-2:6379
+
+  redis-2:
+    extends:
+      file: ./Services/Compute/docker-compose-dev.yml
+      service: compute-redis-template
+    container_name: redis-cache-dev-2
+    networks:
+      - raion-compute-net-2
+    volumes:
+      - redis-2-data:/data
+
+
+
+  # =================================================== #
+  # ==================== Dev Tools ==================== #
+  # =================================================== #
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight-web
+    ports:
+      - "5540:5540"
+    networks:
+      - raion-net
+      - raion-compute-net-1
+      - raion-compute-net-2
+
+
+
+  # =============================================== #
+  # ==================== Setup ==================== #
+  # =============================================== #
+volumes:
+  redis-1-data:
+  redis-2-data:
+
+
+
+networks:
+  raion-net:
+  raion-compute-net-1:
+  raion-compute-net-2:

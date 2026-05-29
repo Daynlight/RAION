@@ -1,6 +1,11 @@
 services:
+  # ================================================= #
+  # ==================== Gateway ==================== #
+  # ================================================= #
   gateway:
-    image: raion-gateway:latest
+    build:
+      context: .
+      dockerfile: ./Services/Gateway/Dockerfile
     container_name: gateway-api
     restart: always
     env_file:
@@ -12,19 +17,25 @@ services:
 
 
 
+  # ==================================================== #
+  # ==================== Controller ==================== #
+  # ==================================================== #
   controller:
-    image: raion-controller:latest
+    build:
+      context: .
+      dockerfile: ./Services/Controller/Dockerfile
     container_name: controller-api
     restart: always
     env_file:
       - ./Services/Controller/.env
-    ports:
-      - "${CONTROLLER_PORT}:8080"
     networks:
       - raion-net
 
 
 
+  # =============================================== #
+  # ==================== Setup ==================== #
+  # =============================================== #
 networks:
   raion-net:
-    external: true
+    driver: bridge
