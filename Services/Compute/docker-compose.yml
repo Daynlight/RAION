@@ -1,0 +1,47 @@
+services:
+  # ================================================= #
+  # ==================== Compute ==================== #
+  # ================================================= #
+  compute:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: compute-api
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:8080"
+    environment:
+      - ConnectionStrings__Redis=redis-compute:6379 
+    networks:
+      - raion-compute-net
+    depends_on:
+      - redis
+
+
+
+  # ================================================= #
+  # ===================== Redis ===================== #
+  # ================================================= #
+  redis:
+    image: redis:7-alpine
+    container_name: redis-compute
+    restart: always
+    command: redis-server --protected-mode yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - raion-compute-net
+
+
+
+# =============================================== #
+# ==================== Setup ==================== #
+# =============================================== #
+volumes:
+  redis-data:
+
+networks:
+  raion-compute-net:
+    driver: bridge

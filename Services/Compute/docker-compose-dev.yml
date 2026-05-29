@@ -1,0 +1,20 @@
+services:
+  compute-template:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    working_dir: /app
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+      - /app/bin
+      - /app/obj
+    command: dotnet watch run --no-launch-profile --non-interactive
+
+
+
+  compute-redis-template:
+    image: redis:7-alpine
+    ports:
+      - "6379"

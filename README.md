@@ -3,6 +3,21 @@
 Platform for operation orientation in cloud. 
 
 
+## TOC
+- [About](#about)
+- [TOC](#toc)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Services](#services)
+- [Api end-points](#api-end-points)
+- [Architecture](#architecture)
+  - [Gateway](#gateway)
+- [Prerequisites and Technologies](#prerequisites-and-technologies)
+- [Todo:](#todo)
+
+
+
 ## Requirements
 
 <details>
@@ -58,13 +73,14 @@ Platform for operation orientation in cloud.
 ## Services
 - **gateway** main entry
 - **control** control server
-- **compute** computation server
+- **main database (postgresql)** (Log/Control Database)
 
 - **nextjs** (frontend)
 
-- **keycloak** (user JWT Tokens)
-- **control database (redis)** (Log/Control Database)
-- **resource database (redis)** (Storage Database)
+- **keycloak** (user/service JWT Tokens)
+
+- **compute** computation server
+- **cache database (redis)** (Storage Database)
 
 
 
@@ -74,20 +90,23 @@ Platform for operation orientation in cloud.
 
 ## Architecture
 1. All outside request goes to **gateway**.
-2. Main point of **control** is assigning tasks to compute servers.
+2. Main point of **control** is assigning tasks to **compute** servers.
 3. Authentication is provided via dynamic tokens.
-4. Each user is registered to **keycloak**.
-5. Visual interface is provided by **nextjs**.
-6. Each operation, data and register have [**id**, **creation time**].
-7. Each **compute** server have **resource database** to lower data transfer.
-8. In **control** we store last versions of resources.
+4. Visual interface is provided by **nextjs**.
+5. Each user is registered to **keycloak**.
+6. Services are registered via **keycloak**.
+7. Each **compute** server have **cache database** to lower data transfer.
+8. We store data in **main database**.
+9. We allows multiple instances of **compute server**.
+
+### Gateway
 
 
 
 ## Prerequisites and Technologies
-- **docker**
-- **.NET**
-- **redis**
+- **docker**: v29.5.0
+- **.NET**: v9.0
+- **redis**: v7
 - **keycloak**
 - **cloudflare**
 
