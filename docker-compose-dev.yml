@@ -1,0 +1,52 @@
+services:
+  gateway:
+    build:
+      context: ./Services/Gateway
+      dockerfile: Dockerfile.dev
+    container_name: gateway-api-dev
+    working_dir: /app
+    env_file:
+      - ./Services/Gateway/.env
+    volumes:
+      - ./Services/Gateway:/app
+      - /app/bin
+      - /app/obj
+    ports:
+      - "${GATEWAY_PORT}:8080"
+    command: dotnet watch run --no-launch-profile --non-interactive
+
+
+
+  controller:
+    build:
+      context: ./Services/Controller
+      dockerfile: Dockerfile.dev
+    container_name: controller-api-dev
+    working_dir: /app
+    env_file:
+      - ./Services/Controller/.env
+    volumes:
+      - ./Services/Controller:/app
+      - /app/bin
+      - /app/obj
+    ports:
+      - "${CONTROLLER_PORT}:8080"
+    command: dotnet watch run --no-launch-profile --non-interactive
+
+
+
+  compute:
+    build:
+      context: ./Services/Compute
+      dockerfile: Dockerfile.dev
+    container_name: compute-api-dev
+    working_dir: /app
+    env_file:
+      - ./Services/Compute/.env
+    volumes:
+      - ./Services/Compute:/app
+      - /app/bin
+      - /app/obj
+    ports:
+      - "${COMPUTE_PORT}:8080"
+    command: dotnet watch run --no-launch-profile --non-interactive

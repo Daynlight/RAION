@@ -1,0 +1,43 @@
+services:
+  gateway:
+    image: raion-gateway:latest
+    container_name: gateway-api
+    restart: always
+    env_file:
+      - ./Services/Gateway/.env
+    ports:
+      - "${GATEWAY_PORT}:8080"
+    networks:
+      - raion-net
+
+
+
+  controller:
+    image: raion-controller:latest
+    container_name: controller-api
+    restart: always
+    env_file:
+      - ./Services/Controller/.env
+    ports:
+      - "${CONTROLLER_PORT}:8080"
+    networks:
+      - raion-net
+
+
+
+  compute:
+    image: raion-compute:latest
+    container_name: compute-api
+    restart: always
+    env_file:
+      - ./Services/Compute/.env
+    ports:
+      - "${COMPUTE_PORT}:8080"
+    networks:
+      - raion-net
+
+
+
+networks:
+  raion-net:
+    driver: bridge
