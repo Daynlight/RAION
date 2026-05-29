@@ -1,0 +1,16 @@
+services:
+  compute:
+    image: raion-compute:latest
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${COMPUTE_PORT}:8080"
+    networks:
+      - raion-net
+
+
+
+networks:
+  raion-net:
+    external: true

@@ -1,0 +1,11 @@
+services:
+  compute-template:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /app/bin
+      - /app/obj
+    command: dotnet watch run --no-launch-profile --non-interactive

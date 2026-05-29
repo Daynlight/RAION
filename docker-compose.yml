@@ -25,19 +25,6 @@ services:
 
 
 
-  compute:
-    image: raion-compute:latest
-    container_name: compute-api
-    restart: always
-    env_file:
-      - ./Services/Compute/.env
-    ports:
-      - "${COMPUTE_PORT}:8080"
-    networks:
-      - raion-net
-
-
-
 networks:
   raion-net:
-    driver: bridge
+    external: true

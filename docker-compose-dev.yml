@@ -1,3 +1,8 @@
+include:
+  - ./Services/Compute/docker-compose-dev.yml
+
+
+
 services:
   gateway:
     build:
@@ -35,18 +40,18 @@ services:
 
 
 
-  compute:
-    build:
-      context: ./Services/Compute
-      dockerfile: Dockerfile.dev
-    container_name: compute-api-dev
-    working_dir: /app
-    env_file:
-      - ./Services/Compute/.env
-    volumes:
-      - ./Services/Compute:/app
-      - /app/bin
-      - /app/obj
+  compute-1:
+    extends:
+      file: ./Services/Compute/docker-compose-dev.yml
+      service: compute-template
+    container_name: compute-api-dev-1
     ports:
-      - "${COMPUTE_PORT}:8080"
-    command: dotnet watch run --no-launch-profile --non-interactive
+      - "${COMPUTE_PORT_1}:8080"
+
+  compute-2:
+    extends: 
+      file: ./Services/Compute/docker-compose-dev.yml
+      service: compute-template
+    container_name: compute-api-dev-2
+    ports:
+      - "${COMPUTE_PORT_2}:8080"
