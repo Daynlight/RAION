@@ -4,6 +4,28 @@ include:
 
 
 services:
+  # ================================================== #
+  # ==================== Frontend ==================== #
+  # ================================================== #
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: frontend-dev
+    working_dir: /app
+    env_file:
+      - ./frontend/.env
+    volumes:
+      - ./frontend/:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    networks:
+      - raion-frontend-net
+
+
+
   # ================================================= #
   # ==================== Gateway ==================== #
   # ================================================= #
@@ -22,7 +44,7 @@ services:
     ports:
       - "${GATEWAY_PORT}:8080"
     networks:
-      - raion-net
+      - raion-backend-net
     command: dotnet watch run --no-launch-profile --non-interactive
 
 
@@ -45,9 +67,8 @@ services:
     ports:
       - "${CONTROLLER_PORT}:8080"
     networks:
-      - raion-net
+      - raion-backend-net
     command: dotnet watch run --no-launch-profile --non-interactive
-
 
 
 
@@ -106,18 +127,99 @@ services:
 
 
 
+  # ================================================= #
+  # ==================== Identity =================== #
+  # ================================================= #
+  keycloak-db:
+    image: postgres:16-alpine
+    container_name: raion-keycloak-postgres-dev
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${KEYCLOAK_ADMIN}
+      - POSTGRES_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - POSTGRES_DB=${KC_DB}
+    ports:
+      - "${KC_DB_URL_PORT}"
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    networks:
+      - raion-keycloak-net
+    restart: unless-stopped
+
+
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: raion-keycloak-dev
+    command: start-dev --import-realm
+    ports:
+      - "${KC_PORT}:8080"
+    env_file:
+      - .env
+    environment:
+      - KC_DB_URL_HOST=keycloak-db
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+    networks:
+      - raion-keycloak-net
+    depends_on:
+      - keycloak-db
+    restart: unless-stopped
+
+
+
+  # ======================================================= #
+  # ==================== Main Database ==================== #
+  # ======================================================= #
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: raion-postgres-dev
+    env_file:
+      - .env
+    ports:
+      - "5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - raion-backend-net
+    restart: unless-stopped
+
+
+
   # =================================================== #
   # ==================== Dev Tools ==================== #
   # =================================================== #
   redis-insight:
     image: redis/redisinsight:latest
     container_name: redis-insight-web
+    env_file:
+      - .env
     ports:
-      - "5540:5540"
+      - "${REDIS_INSIGHT_PORT}:5540"
     networks:
-      - raion-net
       - raion-compute-net-1
       - raion-compute-net-2
+    depends_on:
+      - redis-1
+      - redis-2
+
+
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: raion-pgadmin-dev
+    env_file:
+      - .env
+    ports:
+      - "${PGADMIN_PORT}:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - raion-backend-net
+    depends_on:
+      - postgres-db
+    restart: unless-stopped
 
 
 
@@ -127,10 +229,16 @@ services:
 volumes:
   redis-1-data:
   redis-2-data:
+  pgadmin-data:
+  postgres-data:
+  keycloak-data:
+  keycloak-db-data:
 
 
 
 networks:
-  raion-net:
+  raion-frontend-net:
+  raion-backend-net:
   raion-compute-net-1:
   raion-compute-net-2:
+  raion-keycloak-net:

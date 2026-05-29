@@ -73,11 +73,11 @@ Platform for operation orientation in cloud.
 ## Services
 - **gateway** main entry
 - **control** control server
+- **main database (postgresql)** (Log/Control Database)
 
 - **nextjs** (frontend)
 
 - **keycloak** (user/service JWT Tokens)
-- **main database (redis)** (Log/Control Database)
 
 - **compute** computation server
 - **cache database (redis)** (Storage Database)
